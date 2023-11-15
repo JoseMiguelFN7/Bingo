@@ -3,6 +3,7 @@ program sudoku;
 uses crt;
 var
 i, j: integer;
+bbb: char;
 tabJuego: array[1..9, 1..9] of integer;
 indexPistas: array[1..2, 1..17] of integer;
 const
@@ -90,17 +91,21 @@ end;
 
 
 begin
-    clrscr;
-    Randomize;
-    elegirTablero();
-    elegirPistas();
-    {for i:=1 to 9 do
-    begin
-        for j:=1 to 9 do
+    repeat
+        clrscr;
+        Randomize;
+        elegirTablero();
+        elegirPistas();
+        for i:=1 to 9 do
         begin
-            write(tabJuego[i, j], ' ');
+            for j:=1 to 9 do
+            begin
+                write(tabJuego[i, j], ' ');
+            end;
+            writeln('');
         end;
-        writeln('');
-    end;}
-    generarTablero();
+        bbb:=readkey;
+    until bbb='q';
+    //generarTablero();
+    readkey;
 end.
