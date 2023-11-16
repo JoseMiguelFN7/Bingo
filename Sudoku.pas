@@ -130,6 +130,23 @@ begin
 	Jugador();
 end;}
 
+//IDEA PARA LA SALIDA
+{procedure Salir;
+begin
+	ClrScr;
+	if //Aqui iria un boolean predefinido para saber si son iguales junto con -> then;
+		begin
+			writeln('FELICIDADES, HAS TERMINADO EL SUDOKU');
+			//En esta linea iria una funcion respecto a la solucion.
+		end
+	else
+		begin
+			writeln('La solucion del sudoku es:');
+			//En esta linea iria una funcion respecto a la solucion.
+		end;
+	writeln('Gracias por jugar');
+	Halt;
+end;}
 
 begin
     repeat
