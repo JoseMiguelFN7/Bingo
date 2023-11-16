@@ -89,6 +89,47 @@ begin
     end;
 end;
 
+//IDEA ACCION DE JUGADOR
+{procedure Jugador();
+var
+f, c, n: integer;
+verificar: boolean;
+begin
+	ClrScr;
+	writeln(Nombre);
+	//En esta linea va la funcion de mostrar el tablero o matriz en pantalla.
+	verificar:= false;
+	repeat
+		if verificar then 
+		writeln('El digito ingresado no se encuentra entre los valores (1..9)');
+		write('Ingrese la posición de la fila(1..9)');
+		readln(f);
+		if f=0 then Salir(); //Salir seria la funcion para cerrar el programa.
+		verificar:= true;
+	until (f>0) and (f<=9);
+	verificar:= false;
+	repeat
+		if verificar then
+		writeln('El digito ingresado no se encuentra entre los valores (1..9)');
+		write('Ingrese la posicion de la columna');
+		readln(c);
+		if c=0 then Salir(); //Salir seria la funcion para cerrar el programa.
+		verificar:= true;
+	until (c>0) and (c<=9);
+	verificar:= false;
+	repeat 
+		if verificar then
+		writeln('El digito ingresado no se encuentra entre los valores (1..9)');
+		write('Ingrese el numero (1..9)');
+		readln(n);
+		if n=0 then Salir();
+		verificar:= true;
+	until (n>0) and (n<=9);
+	//Aqui iria la variable del arrayjunto con -> [c,f]:= n;
+	if //Aqui iria un boolean predefinido para saber si son iguales junto con -> then Salir();
+	Jugador();
+end;}
+
 
 begin
     repeat
