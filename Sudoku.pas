@@ -3,12 +3,11 @@ program sudoku;
 uses crt;
 var
 i, j, fJugadaInt, cJugadaInt, nJugadoInt: integer;
-bbb: char;
 nombre, fJugada, cJugada, nJugado: string;
 tabElegido, tabJuego: array[1..9, 1..9] of integer;
 indexPistas: array[1..2, 1..17] of integer;
-{subTab1, subTab2, subTab3, subTab4, subTab5, subTab6, subTab7, subTab8, subTab9: array[1..3, 1..3] of integer;
-subtabs: array[]}
+subTab1, subTab2, subTab3, subTab4, subTab5, subTab6, subTab7, subTab8, subTab9: array[1..3, 1..3] of integer;
+subtabs: array[1..3, 1..3] of array[1..3, 1..3] of integer;
 const
 tab1: array[1..9, 1..9] of integer = ((3,7,9,2,1,5,4,6,8), (4,8,1,6,3,7,2,5,9), (2,5,6,8,4,9,1,3,7), (6,3,7,4,5,1,9,8,2), (8,9,2,7,6,3,5,1,4), (1,4,5,9,2,8,3,7,6), (5,2,4,1,7,6,8,9,3), (9,6,3,5,8,2,7,4,1), (7,1,8,3,9,4,6,2,5));
 tab2: array[1..9, 1..9] of integer = ((6,9,5,2,7,8,3,1,4), (3,4,1,5,9,6,7,2,8), (2,8,7,1,3,4,5,6,9), (1,2,4,6,8,3,9,7,5), (5,6,3,9,2,7,4,8,1), (9,7,8,4,5,1,6,3,2), (7,3,2,8,4,5,1,9,6), (8,5,6,7,1,9,2,4,3), (4,1,9,3,6,2,8,5,7));
@@ -107,10 +106,11 @@ procedure generarTablero();
 var
 f, c, num: integer;
 begin
-    writeln('||===|===|===||===|===|===||===|===|===||');
+    writeln('');
+    writeln('  ||===|===|===||===|===|===||===|===|===||                Para rendirse, introduzca 0 en cualquier momento.');
     for f:=1 to 9 do
     begin
-        write('|| ');
+        write('  || ');
         for c:=1 to 9 do
         begin
             if esPista(f,c) then
@@ -135,9 +135,99 @@ begin
         writeln('');
         if (f mod 3 = 0) then
         begin
-            writeln('||===|===|===||===|===|===||===|===|===||');
+            writeln('  ||===|===|===||===|===|===||===|===|===||');
         end
-        else writeln('||---|---|---||---|---|---||---|---|---||');
+        else writeln('  ||---|---|---||---|---|---||---|---|---||');
+    end;
+    writeln('');
+end;
+
+procedure mostrarRespuesta();
+var f, c: integer;
+begin
+    clrscr;
+    writeln('La solucion del sudoku es la siguiente:');
+    writeln('');
+    writeln('  ||===|===|===||===|===|===||===|===|===||');
+    for f:=1 to 9 do
+    begin
+        write('  || ');
+        for c:=1 to 9 do
+        begin
+            if esPista(f,c) then
+            begin
+                TextColor(3);
+            end;
+            if (c mod 3 = 0) then
+            begin
+                write(tabElegido[f,c]); TextColor(15); write(' || ');
+            end
+            else begin
+                write(tabElegido[f,c]); TextColor(15); write(' | ');
+            end;
+        end;
+        writeln('');
+        if (f mod 3 = 0) then
+        begin
+            writeln('  ||===|===|===||===|===|===||===|===|===||');
+        end
+        else writeln('  ||---|---|---||---|---|---||---|---|---||');
+    end;
+    writeln('');
+    writeln('¡Muchas gracias por jugar!');
+    writeln('Presione cualquier tecla para salir...');
+    readkey;
+    halt(0);
+end;
+
+procedure solicitarFila();
+begin
+    writeln('  |------------------------------------------------------------------------|');
+    writeln('  |  Indique el número de la fila de la casilla que desea jugar (1-9):     |');
+    writeln('  |------------------------------------------------------------------------|');
+    write('  |-> ');
+    readln(fJugada);
+    gotoXY(76, WhereY-1); writeln('|');
+    if esNumero(fJugada, fJugadaInt) then
+    begin
+        if fJugadaInt=0 then
+        begin
+            mostrarRespuesta();
+        end;
+    end;
+end;
+
+procedure solicitarColumna();
+begin
+    writeln('  |------------------------------------------------------------------------|');
+    writeln('  |  Indique el número de la columna de la casilla que desea jugar (1-9):  |');
+    writeln('  |------------------------------------------------------------------------|');
+    write('  |-> ');
+    readln(cJugada);
+    gotoXY(76, WhereY-1); writeln('|');
+    if esNumero(cJugada, cJugadaInt) then
+    begin
+        if cJugadaInt=0 then
+        begin
+            mostrarRespuesta();
+        end;
+    end;
+end;
+
+procedure solicitarNumero();
+begin
+    writeln('  |------------------------------------------------------------------------|');
+    writeln('  |  Indique el número que desea ingresar en el tablero (1-9):             |');
+    writeln('  |------------------------------------------------------------------------|');
+    write('  |-> ');
+    readln(nJugado);
+    gotoXY(76, WhereY-1); writeln('|');
+    if esNumero(nJugado, nJugadoInt) then
+    begin
+        if nJugadoInt=0 then
+        begin
+            mostrarRespuesta();
+        end;
     end;
 end;
 
@@ -201,29 +291,41 @@ begin
 end;}
 
 begin
+    clrscr;
+    writeln('¡Bienvenido a SUDOKU!');
+    writeln('Presione cualquier tecla para continuar...');
+    readkey;
     repeat
         clrscr;
-        Randomize;
-        elegirTablero();
-        elegirPistas();
-        for i:=1 to 9 do
+        write('Por favor ingrese su nickname de jugador: ');
+        readln(nombre);
+        if (nombre='') then
         begin
-            for j:=1 to 9 do
-            begin
-                write(tabElegido[i, j], ' ');
-            end;
-            writeln('');
+            writeln('Debe ingresar un nickname.');
+            delay(2000);
         end;
-        bbb:=readkey;
-    until bbb='q';
-    generarTablero();
-    for i:=1 to 9 do
+    until not (nombre='');
+    writeln('¡Hola, ', nombre, '! Te deseamos mucha suerte.');
+    writeln('Presione cualquier tecla para jugar...');
+    readkey;
+    Randomize;
+    elegirTablero();
+    elegirPistas();
+    repeat
+        generarTablero();
+        solicitarFila();
+        solicitarColumna();
+        solicitarNumero();
+        if not ((esNumero(fJugada, fJugadaInt)) and (esNumero(cJugada, cJugadaInt)) and (esNumero(nJugado, nJugadoInt))) then
         begin
-            for j:=1 to 9 do
-            begin
-                write(tabJuego[i, j], ' ');
-            end;
-            writeln('');
+            clrscr;
+            writeln('  |------------------------------------------------------------------------|');
+            writeln('  |                  Los datos ingresados no son válidos.                  |');
+            writeln('  |------------------------------------------------------------------------|');
+            delay(2000);
+        end else begin
+            
         end;
+    until ((esNumero(fJugada, fJugadaInt)) and (esNumero(cJugada, cJugadaInt)) and (esNumero(nJugado, nJugadoInt)));
     readkey;
 end.
