@@ -102,7 +102,7 @@ begin
     for 
 end;}
 
-procedure generarTablero();
+procedure generarTableroInicial();
 var
 f, c, num: integer;
 begin
@@ -130,6 +130,46 @@ begin
             end
             else begin
                 write(num); TextColor(15); write(' | ');
+            end;
+        end;
+        writeln('');
+        if (f mod 3 = 0) then
+        begin
+            writeln('  ||===|===|===||===|===|===||===|===|===||');
+        end
+        else writeln('  ||---|---|---||---|---|---||---|---|---||');
+    end;
+    writeln('');
+end;
+
+procedure generarTableroJuego();
+var
+f, c: integer;
+begin
+    writeln('');
+    writeln('  ||===|===|===||===|===|===||===|===|===||                Para rendirse, introduzca 0 en cualquier momento.');
+    for f:=1 to 9 do
+    begin
+        write('  || ');
+        for c:=1 to 9 do
+        begin
+            if esPista(f,c) then
+            begin
+                TextColor(3);
+            end
+            else begin
+                if tabJuego[f,c]=0 then
+                begin
+                    TextColor(0);
+                end
+                else TextColor(15);
+            end;
+            if (c mod 3 = 0) then
+            begin
+                write(tabJuego[f,c]); TextColor(15); write(' || ');
+            end
+            else begin
+                write(tabJuego[f,c]); TextColor(15); write(' | ');
             end;
         end;
         writeln('');
@@ -180,55 +220,66 @@ begin
     halt(0);
 end;
 
-procedure solicitarFila();
+procedure comprobarCero(n: string; nInt: integer);
 begin
-    writeln('  |------------------------------------------------------------------------|');
-    writeln('  |  Indique el número de la fila de la casilla que desea jugar (1-9):     |');
-    writeln('  |------------------------------------------------------------------------|');
-    write('  |-> ');
-    readln(fJugada);
-    gotoXY(76, WhereY-1); writeln('|');
-    if esNumero(fJugada, fJugadaInt) then
+    if esNumero(n, nInt) then
     begin
-        if fJugadaInt=0 then
+        if nInt=0 then
         begin
             mostrarRespuesta();
         end;
+    end
+    else begin
+        writeln('  |------------------------------------------------------------------------|');
+        writeln('  |                    El dato ingresado no es válido.                     |');
+        writeln('  |------------------------------------------------------------------------|');
+        delay(2000);
     end;
+end;
+
+procedure solicitarFila();
+begin
+    repeat
+        clrscr;
+        generarTableroJuego();
+        writeln('  |------------------------------------------------------------------------|');
+        writeln('  |  Indique el número de la fila de la casilla que desea jugar (1-9):     |');
+        writeln('  |------------------------------------------------------------------------|');
+        write('  |-> ');
+        readln(fJugada);
+        gotoXY(76, WhereY-1); writeln('|');
+        comprobarCero(fJugada, fJugadaInt);
+    until esNumero(fJugada, fJugadaInt);
 end;
 
 procedure solicitarColumna();
 begin
-    writeln('  |------------------------------------------------------------------------|');
-    writeln('  |  Indique el número de la columna de la casilla que desea jugar (1-9):  |');
-    writeln('  |------------------------------------------------------------------------|');
-    write('  |-> ');
-    readln(cJugada);
-    gotoXY(76, WhereY-1); writeln('|');
-    if esNumero(cJugada, cJugadaInt) then
-    begin
-        if cJugadaInt=0 then
-        begin
-            mostrarRespuesta();
-        end;
-    end;
+    repeat
+        clrscr;
+        generarTableroJuego();
+        writeln('  |------------------------------------------------------------------------|');
+        writeln('  |  Indique el número de la columna de la casilla que desea jugar (1-9):  |');
+        writeln('  |------------------------------------------------------------------------|');
+        write('  |-> ');
+        readln(cJugada);
+        gotoXY(76, WhereY-1); writeln('|');
+        comprobarCero(cJugada, cJugadaInt);
+    until esNumero(cJugada, cJugadaInt);
 end;
 
 procedure solicitarNumero();
 begin
-    writeln('  |------------------------------------------------------------------------|');
-    writeln('  |  Indique el número que desea ingresar en el tablero (1-9):             |');
-    writeln('  |------------------------------------------------------------------------|');
-    write('  |-> ');
-    readln(nJugado);
-    gotoXY(76, WhereY-1); writeln('|');
-    if esNumero(nJugado, nJugadoInt) then
-    begin
-        if nJugadoInt=0 then
-        begin
-            mostrarRespuesta();
-        end;
-    end;
+    repeat
+        clrscr;
+        generarTableroJuego();
+        writeln('  |------------------------------------------------------------------------|');
+        writeln('  |  Indique el número que desea ingresar en el tablero (1-9):             |');
+        writeln('  |------------------------------------------------------------------------|');
+        write('  |-> ');
+        readln(nJugado);
+        gotoXY(76, WhereY-1); writeln('|');
+        comprobarCero(nJugado, nJugadoInt);
+    until esNumero(nJugado, nJugadoInt);
 end;
 
 //IDEA ACCION DE JUGADOR
@@ -311,21 +362,13 @@ begin
     Randomize;
     elegirTablero();
     elegirPistas();
+    generarTableroInicial();
+    writeln('Presione cualquier tecla para empezar a jugar...');
+    readkey;
     repeat
-        generarTablero();
         solicitarFila();
         solicitarColumna();
         solicitarNumero();
-        if not ((esNumero(fJugada, fJugadaInt)) and (esNumero(cJugada, cJugadaInt)) and (esNumero(nJugado, nJugadoInt))) then
-        begin
-            clrscr;
-            writeln('  |------------------------------------------------------------------------|');
-            writeln('  |                  Los datos ingresados no son válidos.                  |');
-            writeln('  |------------------------------------------------------------------------|');
-            delay(2000);
-        end else begin
-            
-        end;
-    until ((esNumero(fJugada, fJugadaInt)) and (esNumero(cJugada, cJugadaInt)) and (esNumero(nJugado, nJugadoInt)));
+    until true;
     readkey;
 end.
