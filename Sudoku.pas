@@ -2,10 +2,13 @@ program sudoku;
 {$codepage UTF8} //Permite usar acentos y ñ en consola.
 uses crt;
 var
-i, j: integer;
+i, j, fJugadaInt, cJugadaInt, nJugadoInt: integer;
 bbb: char;
-tabJuego: array[1..9, 1..9] of integer;
+nombre, fJugada, cJugada, nJugado: string;
+tabElegido, tabJuego: array[1..9, 1..9] of integer;
 indexPistas: array[1..2, 1..17] of integer;
+{subTab1, subTab2, subTab3, subTab4, subTab5, subTab6, subTab7, subTab8, subTab9: array[1..3, 1..3] of integer;
+subtabs: array[]}
 const
 tab1: array[1..9, 1..9] of integer = ((3,7,9,2,1,5,4,6,8), (4,8,1,6,3,7,2,5,9), (2,5,6,8,4,9,1,3,7), (6,3,7,4,5,1,9,8,2), (8,9,2,7,6,3,5,1,4), (1,4,5,9,2,8,3,7,6), (5,2,4,1,7,6,8,9,3), (9,6,3,5,8,2,7,4,1), (7,1,8,3,9,4,6,2,5));
 tab2: array[1..9, 1..9] of integer = ((6,9,5,2,7,8,3,1,4), (3,4,1,5,9,6,7,2,8), (2,8,7,1,3,4,5,6,9), (1,2,4,6,8,3,9,7,5), (5,6,3,9,2,7,4,8,1), (9,7,8,4,5,1,6,3,2), (7,3,2,8,4,5,1,9,6), (8,5,6,7,1,9,2,4,3), (4,1,9,3,6,2,8,5,7));
@@ -21,19 +24,19 @@ begin
     ran:=random(5)+1; //Genera un numero random entre 1 y 5.
     case (ran) of
         1: begin
-            tabJuego:=tab1;
+            tabElegido:=tab1;
         end;
         2: begin
-            tabJuego:=tab2;
+            tabElegido:=tab2;
         end;
         3: begin
-            tabJuego:=tab3;
+            tabElegido:=tab3;
         end;
         4: begin
-            tabJuego:=tab4;
+            tabElegido:=tab4;
         end;
         5: begin
-            tabJuego:=tab5;
+            tabElegido:=tab5;
         end;
     end;
 end;
@@ -64,9 +67,45 @@ begin
     until (k=18);
 end;
 
+function esPista(f,c: integer): boolean;
+var indexp: integer;
+begin
+    esPista:=false;
+    for indexp:=1 to 17 do
+    begin
+        if ((f=indexPistas[indexp,1]) and (c=indexPistas[indexp,2])) then
+        begin
+            esPista:=true;
+            break;
+        end;
+    end;
+end;
+
+function esNumero(n: string; var nInt: integer): boolean;
+var error: integer;
+begin
+    esNumero:=true;
+    val(n, nInt, error);
+    if (error<>0) then
+    begin
+        esNumero:= false;
+        exit;
+    end;
+    if ((nInt<0) or (nInt>9)) then
+    begin
+        esNumero:= false;
+    end;
+end;
+
+{function numeroValido(n: integer): boolean;
+var m: integer;
+begin
+    for 
+end;}
+
 procedure generarTablero();
 var
-f, c: integer;
+f, c, num: integer;
 begin
     writeln('||===|===|===||===|===|===||===|===|===||');
     for f:=1 to 9 do
@@ -74,11 +113,24 @@ begin
         write('|| ');
         for c:=1 to 9 do
         begin
+            if esPista(f,c) then
+            begin
+                TextColor(3);
+                num:=tabElegido[f,c];
+            end
+            else 
+            begin
+                TextColor(0);
+                num:=0;
+            end;
+            tabJuego[f,c]:=num;
             if (c mod 3 = 0) then
             begin
-                write(0, ' || ');
+                write(num); TextColor(15); write(' || ');
             end
-            else write(0, ' | ');
+            else begin
+                write(num); TextColor(15); write(' | ');
+            end;
         end;
         writeln('');
         if (f mod 3 = 0) then
@@ -158,12 +210,20 @@ begin
         begin
             for j:=1 to 9 do
             begin
-                write(tabJuego[i, j], ' ');
+                write(tabElegido[i, j], ' ');
             end;
             writeln('');
         end;
         bbb:=readkey;
     until bbb='q';
-    //generarTablero();
+    generarTablero();
+    for i:=1 to 9 do
+        begin
+            for j:=1 to 9 do
+            begin
+                write(tabJuego[i, j], ' ');
+            end;
+            writeln('');
+        end;
     readkey;
 end.
