@@ -6,8 +6,9 @@ i, j, fJugadaInt, cJugadaInt, nJugadoInt: integer;
 nombre, fJugada, cJugada, nJugado: string;
 tabElegido, tabJuego: array[1..9, 1..9] of integer;
 indexPistas: array[1..2, 1..17] of integer;
-subTab1, subTab2, subTab3, subTab4, subTab5, subTab6, subTab7, subTab8, subTab9: array[1..3, 1..3] of integer;
-subtabs: array[1..3, 1..3] of array[1..3, 1..3] of integer;
+indexSubArray: array[1..2] of integer;
+indexerror: array of integer;
+a: char;
 const
 tab1: array[1..9, 1..9] of integer = ((3,7,9,2,1,5,4,6,8), (4,8,1,6,3,7,2,5,9), (2,5,6,8,4,9,1,3,7), (6,3,7,4,5,1,9,8,2), (8,9,2,7,6,3,5,1,4), (1,4,5,9,2,8,3,7,6), (5,2,4,1,7,6,8,9,3), (9,6,3,5,8,2,7,4,1), (7,1,8,3,9,4,6,2,5));
 tab2: array[1..9, 1..9] of integer = ((6,9,5,2,7,8,3,1,4), (3,4,1,5,9,6,7,2,8), (2,8,7,1,3,4,5,6,9), (1,2,4,6,8,3,9,7,5), (5,6,3,9,2,7,4,8,1), (9,7,8,4,5,1,6,3,2), (7,3,2,8,4,5,1,9,6), (8,5,6,7,1,9,2,4,3), (4,1,9,3,6,2,8,5,7));
@@ -96,11 +97,85 @@ begin
     end;
 end;
 
-{function numeroValido(n: integer): boolean;
-var m: integer;
+procedure getSubArray();
+var
+rf, rc: real;
 begin
-    for 
-end;}
+    rf:= fJugadaInt/3;
+    rc:= cJugadaInt/3;
+    if (rf<=1) then
+    begin
+        indexSubArray[1]:=1;
+    end
+    else begin
+        if (rf<=2) then
+        begin
+            indexSubArray[1]:=4;
+        end
+        else begin
+            if (rf<=3) then
+            begin
+                indexSubArray[1]:=7;
+            end
+        end;
+    end;
+    if (rc<=1) then
+    begin
+        indexSubArray[2]:=1;
+    end
+    else begin
+        if (rc<=2) then
+        begin
+            indexSubArray[2]:=4;
+        end
+        else begin
+            if (rc<=3) then
+            begin
+                indexSubArray[2]:=7;
+            end
+        end;
+    end;
+end;
+
+function numeroValido(): boolean;
+var m, n: integer;
+begin
+    numeroValido:=true;
+    for m:=1 to 9 do
+    begin
+        if not (m=cJugadaInt) then
+        begin
+            if (tabJuego[fJugadaInt, m]=nJugadoInt) then
+            begin
+                numeroValido:=false;
+                exit;
+            end;
+        end;
+        if not (m=fJugadaInt) then
+        begin
+            if (tabJuego[m, cJugadaInt]=nJugadoInt) then
+            begin
+                numeroValido:=false;
+                exit;
+            end;
+        end;
+    end;
+    getSubArray();
+    for m:=indexSubArray[1] to indexSubArray[1]+2 do
+    begin
+        for n:=indexSubArray[2] to indexSubArray[2]+2 do
+        begin
+            if not ((m=fJugadaInt) and (n=cJugadaInt)) then
+            begin
+                if (tabJuego[m,n]=nJugadoInt) then
+                begin
+                    numeroValido:=false;
+                    exit;
+                end;
+            end;
+        end;
+    end;
+end;
 
 procedure generarTableroInicial();
 var
@@ -158,11 +233,19 @@ begin
                 TextColor(3);
             end
             else begin
-                if tabJuego[f,c]=0 then
+                if (tabJuego[f,c]=0) then
                 begin
                     TextColor(0);
                 end
-                else TextColor(15);
+                else begin
+                    if (numeroValido()) then 
+                    begin
+                        TextColor(15);
+                    end
+                    else begin
+                        TextColor(4);
+                    end;
+                end;
             end;
             if (c mod 3 = 0) then
             begin
@@ -237,109 +320,30 @@ begin
     end;
 end;
 
-procedure solicitarFila();
+procedure solicitarElemento(var jugada: string; var jugadaInt: integer; p: integer);
 begin
     repeat
         clrscr;
         generarTableroJuego();
         writeln('  |------------------------------------------------------------------------|');
-        writeln('  |  Indique el número de la fila de la casilla que desea jugar (1-9):     |');
+        case (p) of
+            1: begin
+                writeln('  |  Indique el número de la fila de la casilla que desea jugar (1-9):     |');
+            end;
+            2: begin
+                writeln('  |  Indique el número de la columna de la casilla que desea jugar (1-9):  |');
+            end;
+            3: begin
+                writeln('  |  Indique el número que desea ingresar en el tablero (1-9):             |');
+            end;
+        end;
         writeln('  |------------------------------------------------------------------------|');
         write('  |-> ');
-        readln(fJugada);
+        readln(jugada);
         gotoXY(76, WhereY-1); writeln('|');
-        comprobarCero(fJugada, fJugadaInt);
-    until esNumero(fJugada, fJugadaInt);
+        comprobarCero(jugada, jugadaInt);
+    until esNumero(jugada, jugadaInt);
 end;
-
-procedure solicitarColumna();
-begin
-    repeat
-        clrscr;
-        generarTableroJuego();
-        writeln('  |------------------------------------------------------------------------|');
-        writeln('  |  Indique el número de la columna de la casilla que desea jugar (1-9):  |');
-        writeln('  |------------------------------------------------------------------------|');
-        write('  |-> ');
-        readln(cJugada);
-        gotoXY(76, WhereY-1); writeln('|');
-        comprobarCero(cJugada, cJugadaInt);
-    until esNumero(cJugada, cJugadaInt);
-end;
-
-procedure solicitarNumero();
-begin
-    repeat
-        clrscr;
-        generarTableroJuego();
-        writeln('  |------------------------------------------------------------------------|');
-        writeln('  |  Indique el número que desea ingresar en el tablero (1-9):             |');
-        writeln('  |------------------------------------------------------------------------|');
-        write('  |-> ');
-        readln(nJugado);
-        gotoXY(76, WhereY-1); writeln('|');
-        comprobarCero(nJugado, nJugadoInt);
-    until esNumero(nJugado, nJugadoInt);
-end;
-
-//IDEA ACCION DE JUGADOR
-{procedure Jugador();
-var
-f, c, n: integer;
-verificar: boolean;
-begin
-	ClrScr;
-	writeln(Nombre);
-	//En esta linea va la funcion de mostrar el tablero o matriz en pantalla.
-	verificar:= false;
-	repeat
-		if verificar then 
-		writeln('El digito ingresado no se encuentra entre los valores (1..9)');
-		write('Ingrese la posición de la fila(1..9)');
-		readln(f);
-		if f=0 then Salir(); //Salir seria la funcion para cerrar el programa.
-		verificar:= true;
-	until (f>0) and (f<=9);
-	verificar:= false;
-	repeat
-		if verificar then
-		writeln('El digito ingresado no se encuentra entre los valores (1..9)');
-		write('Ingrese la posicion de la columna');
-		readln(c);
-		if c=0 then Salir(); //Salir seria la funcion para cerrar el programa.
-		verificar:= true;
-	until (c>0) and (c<=9);
-	verificar:= false;
-	repeat 
-		if verificar then
-		writeln('El digito ingresado no se encuentra entre los valores (1..9)');
-		write('Ingrese el numero (1..9)');
-		readln(n);
-		if n=0 then Salir();
-		verificar:= true;
-	until (n>0) and (n<=9);
-	//Aqui iria la variable del arrayjunto con -> [c,f]:= n;
-	if //Aqui iria un boolean predefinido para saber si son iguales junto con -> then Salir();
-	Jugador();
-end;}
-
-//IDEA PARA LA SALIDA
-{procedure Salir;
-begin
-	ClrScr;
-	if //Aqui iria un boolean predefinido para saber si son iguales junto con -> then;
-		begin
-			writeln('FELICIDADES, HAS TERMINADO EL SUDOKU');
-			//En esta linea iria una funcion respecto a la solucion.
-		end
-	else
-		begin
-			writeln('La solucion del sudoku es:');
-			//En esta linea iria una funcion respecto a la solucion.
-		end;
-	writeln('Gracias por jugar');
-	Halt;
-end;}
 
 begin
     clrscr;
@@ -366,9 +370,29 @@ begin
     writeln('Presione cualquier tecla para empezar a jugar...');
     readkey;
     repeat
-        solicitarFila();
-        solicitarColumna();
-        solicitarNumero();
-    until true;
+        repeat
+            solicitarElemento(fJugada, fJugadaInt, 1);
+            solicitarElemento(cJugada, cJugadaInt, 2);
+            if (esPista(fJugadaInt, cJugadaInt)) then
+            begin
+                writeln('No puede modificar las casillas de pista.');
+                delay(3000);
+            end;
+        until not (esPista(fJugadaInt, cJugadaInt));
+        repeat
+            solicitarElemento(nJugado, nJugadoInt, 3);
+            tabJuego[fJugadaInt, cJugadaInt]:=nJugadoInt;
+            if not numeroValido() then
+            begin
+                clrscr;
+                generarTableroJuego();
+                writeln('El número ingresado se repite en la misma fila, columna, o matriz de 3x3. Ingrese un valor válido.');
+                writeln(nJugadoInt);
+                write(indexSubArray[1], '    ', indexSubArray[2]);
+                delay(3000);
+            end;
+        until numeroValido();
+        a:=readkey;
+    until a='q';
     readkey;
 end.
