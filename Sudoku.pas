@@ -6,8 +6,7 @@ i, j, fJugadaInt, cJugadaInt, nJugadoInt: integer;
 nombre, fJugada, cJugada, nJugado: string;
 tabElegido, tabJuego: array[1..9, 1..9] of integer;
 indexPistas: array[1..2, 1..17] of integer;
-indexSubArray: array[1..2] of integer;
-indexerror: array of integer;
+indexSubArray, indexerror: array[1..2] of integer;
 a: char;
 const
 tab1: array[1..9, 1..9] of integer = ((3,7,9,2,1,5,4,6,8), (4,8,1,6,3,7,2,5,9), (2,5,6,8,4,9,1,3,7), (6,3,7,4,5,1,9,8,2), (8,9,2,7,6,3,5,1,4), (1,4,5,9,2,8,3,7,6), (5,2,4,1,7,6,8,9,3), (9,6,3,5,8,2,7,4,1), (7,1,8,3,9,4,6,2,5));
@@ -238,12 +237,12 @@ begin
                     TextColor(0);
                 end
                 else begin
-                    if (numeroValido()) then 
+                    if ((f=indexerror[1]) and (c=indexerror[2])) then 
                     begin
-                        TextColor(15);
+                        TextColor(4);
                     end
                     else begin
-                        TextColor(4);
+                        TextColor(15);
                     end;
                 end;
             end;
@@ -382,17 +381,19 @@ begin
         repeat
             solicitarElemento(nJugado, nJugadoInt, 3);
             tabJuego[fJugadaInt, cJugadaInt]:=nJugadoInt;
+            indexerror[1]:=0;
+            indexerror[2]:=0;
             if not numeroValido() then
             begin
                 clrscr;
+                indexerror[1]:=fJugadaInt;
+                indexerror[2]:=cJugadaInt;
                 generarTableroJuego();
                 writeln('El número ingresado se repite en la misma fila, columna, o matriz de 3x3. Ingrese un valor válido.');
-                writeln(nJugadoInt);
-                write(indexSubArray[1], '    ', indexSubArray[2]);
                 delay(3000);
             end;
         until numeroValido();
-        a:=readkey;
-    until a='q';
+        a:=readkey; 
+    until a='q'; //Agregar aqui funcion booleana que chequea si el tablero fue finalizado.
     readkey;
 end.
