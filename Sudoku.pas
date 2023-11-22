@@ -2,7 +2,7 @@ program sudoku;
 {$codepage UTF8} //Permite usar acentos y ñ en consola.
 uses crt;
 var
-fJugadaInt, cJugadaInt, nJugadoInt, nError, aaa: integer; //Fila, columna y numero ingresado por el usuario.
+fJugadaInt, cJugadaInt, nJugadoInt, nError: integer; //Fila, columna y numero ingresado por el usuario.
 nombre, fJugada, cJugada, nJugado: string; //La fila, columna y numero se ingresan como string y despues se pasan a un integer despues de las validaciones.
 tabElegido, tabJuego: array[1..9, 1..9] of integer; //Tablero prediseñado elegido y tablero que se usa durante el juego.
 indexPistas: array[1..2, 1..17] of integer; //Indices de los numeros que seran usados como pistas.
@@ -236,8 +236,6 @@ begin
                 if (tabJuego[indexerror[m, 0], i] = tabJuego[indexerror[m, 0], indexerror[m, 1]]) then
                 begin
                     sigueError:=true;
-                    writeln('CONSEGUIDOF');
-                    delay(2000);
                     break;
                 end;
             end;
@@ -249,8 +247,6 @@ begin
                 if (tabJuego[i, indexerror[m,1]] = tabJuego[indexerror[m,0], indexerror[m,1]]) then
                 begin
                     sigueError:=true;
-                    writeln('CONSEGUIDOC');
-                    delay(2000);
                     break;
                 end;
             end;
@@ -265,8 +261,6 @@ begin
                     if (tabJuego[i,j] = tabJuego[indexerror[m,0], indexerror[m,1]]) then
                     begin
                         sigueError:=true;
-                        writeln('CONSEGUIDOM');
-                        delay(2000);
                         break;
                     end;
                 end;
@@ -482,8 +476,16 @@ begin
 			if tabJuego[i,j]= 0 then //Si se consigue un cero, hay casillas vacias.
             begin
 				ComprobarTabCompletado:= false;
-				break;
+				exit;
             end;
+		end;
+	end;
+	for i:=0 to length(indexerror)- 1 do
+	begin
+		if indexerror[i,0] <> 0 then //Si se consigue un numero que no es cero dentro del arreglo indexerror, aun hay errores en el tablero.
+		begin
+			ComprobarTabCompletado:= false;
+			exit;
 		end;
 	end;
 end;
@@ -564,11 +566,6 @@ begin
         tabJuego[fJugadaInt, cJugadaInt]:=nJugadoInt;
         numeroValido(fJugadaInt, cJugadaInt, nJugadoInt);
         eliminarError();
-        for aaa:=0 to nError-1 do
-        begin
-            writeln(indexerror[aaa, 0], '   ', indexerror[aaa, 1]);
-        end;
-        readkey;
     until ComprobarTabCompletado(); //El juego termina cuando el tablero se completa.
     clrscr;
     generarTableroJuego(); //Genera el tablero completado.
