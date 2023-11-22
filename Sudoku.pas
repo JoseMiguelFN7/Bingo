@@ -2,11 +2,12 @@ program sudoku;
 {$codepage UTF8} //Permite usar acentos y ñ en consola.
 uses crt;
 var
-fJugadaInt, cJugadaInt, nJugadoInt: integer; //Fila, columna y numero ingresado por el usuario.
+fJugadaInt, cJugadaInt, nJugadoInt, nError, aaa: integer; //Fila, columna y numero ingresado por el usuario.
 nombre, fJugada, cJugada, nJugado: string; //La fila, columna y numero se ingresan como string y despues se pasan a un integer despues de las validaciones.
 tabElegido, tabJuego: array[1..9, 1..9] of integer; //Tablero prediseñado elegido y tablero que se usa durante el juego.
 indexPistas: array[1..2, 1..17] of integer; //Indices de los numeros que seran usados como pistas.
-indexSubArray, indexerror: array[1..2] of integer; //Indices de la primera posicion de cada subarreglo 3x3 e indices de la posicion del numero que se repite.
+indexSubArray: array[1..2] of integer; //Indices de la primera posicion de cada subarreglo 3x3 e indices de la posicion del numero que se repite.
+indexerror: array of array of integer;
 const
 //Tableros prediseñados.
 tab1: array[1..9, 1..9] of integer = ((3,7,9,2,1,5,4,6,8), (4,8,1,6,3,7,2,5,9), (2,5,6,8,4,9,1,3,7), (6,3,7,4,5,1,9,8,2), (8,9,2,7,6,3,5,1,4), (1,4,5,9,2,8,3,7,6), (5,2,4,1,7,6,8,9,3), (9,6,3,5,8,2,7,4,1), (7,1,8,3,9,4,6,2,5));
@@ -80,7 +81,7 @@ begin
     end;
 end;
 
-function esNumero(n: string; var nInt: integer): boolean; //Para validar que el dato ingresado es un numero.
+function esNumero(n: string; var nInt: integer): boolean; //Para validar que el dato ingresado es un numero entre 1 y 9.
 var error: integer;
 begin
     esNumero:=true;
@@ -90,18 +91,18 @@ begin
         esNumero:= false;
         exit;
     end;
-    if ((nInt<0) or (nInt>9)) then
+    if ((nInt<1) or (nInt>9)) then
     begin
         esNumero:= false;
     end;
 end;
 
-procedure getSubArray(); //Para determinar los indices para la posicion del primer elemento en el subarray de 3x3.
+procedure getSubArray(f,c: integer); //Para determinar los indices para la posicion del primer elemento en el subarray de 3x3.
 var
 rf, rc: real;
 begin
-    rf:= fJugadaInt/3;
-    rc:= cJugadaInt/3;
+    rf:= f/3;
+    rc:= c/3;
     if (rf<=1) then //Para determinar la fila.
     begin
         indexSubArray[1]:=1;
@@ -136,42 +137,144 @@ begin
     end;
 end;
 
-function numeroValido(): boolean; //Para determinar si el numero se repite en la fila, columna o subarreglo 3x3.
-var m, n: integer;
+procedure agregarError(f, c: integer);
+var
+fError, i: integer;
 begin
-    numeroValido:=true;
+    if (esPista(f, c)) then
+    begin
+        exit;
+    end;
+    for i:=0 to length(indexerror)-1 do
+    begin
+        if ((indexerror[i, 0]=f) and (indexerror[i, 1]=c)) then exit;
+    end;
+    for fError:=0 to nError-1 do
+    begin
+        if indexerror[fError, 0]=0 then
+        begin
+            indexerror[fError, 0]:=f; indexerror[fError, 1]:=c;
+            exit;
+        end;
+    end;
+    nError+=1;
+    SetLength(indexerror, nError, 2);
+    indexerror[nError-1, 0]:=f; indexerror[nError-1, 1]:=c;
+end;
+
+procedure numeroValido(f,c,n: integer); //Para determinar si el numero se repite en la fila, columna o subarreglo 3x3.
+var
+m, a: integer;
+agregar: boolean;
+begin
+    agregar:=false;
     for m:=1 to 9 do
     begin
-        if not (m=cJugadaInt) then //Para no chequear la posicion donde se esta ingresando el numero.
+        if not (m=c) then //Para no chequear la posicion donde se esta ingresando el numero.
         begin
-            if (tabJuego[fJugadaInt, m]=nJugadoInt) then //Si se repite en la fila, no es valido.
+            if (tabJuego[f, m]=n) then //Si se repite en la fila, no es valido.
             begin
-                numeroValido:=false;
-                exit;
+                agregar:=true;
+                agregarError(f, m);
             end;
         end;
-        if not (m=fJugadaInt) then //Para no chequear la posicion donde se esta ingresando el numero.
+        if not (m=f) then //Para no chequear la posicion donde se esta ingresando el numero.
         begin
-            if (tabJuego[m, cJugadaInt]=nJugadoInt) then //Si se repite en la columna, no es valido.
+            if (tabJuego[m, c]=n) then //Si se repite en la columna, no es valido.
             begin
-                numeroValido:=false;
-                exit;
+                agregar:=true;
+                agregarError(m, c);
             end;
         end;
     end;
-    getSubArray(); //Consigue la primera posicion del 3x3 en el tablero.
+    getSubArray(f, c); //Consigue la primera posicion del 3x3 en el tablero.
     for m:=indexSubArray[1] to indexSubArray[1]+2 do
     begin
-        for n:=indexSubArray[2] to indexSubArray[2]+2 do
+        for a:=indexSubArray[2] to indexSubArray[2]+2 do
         begin
-            if not ((m=fJugadaInt) and (n=cJugadaInt)) then //Para no chequear la posicion donde se esta ingresando el numero.
+            if not ((m=f) and (a=c)) then //Para no chequear la posicion donde se esta ingresando el numero.
             begin
-                if (tabJuego[m,n]=nJugadoInt) then //Si se repite en el 3x3, no es valido.
+                if (tabJuego[m,a]=n) then //Si se repite en el 3x3, no es valido.
                 begin
-                    numeroValido:=false;
-                    exit;
+                    agregar:=true;
+                    agregarError(m,a);
                 end;
             end;
+        end;
+    end;
+    if agregar then
+    begin
+        agregarError(f, c);
+    end;
+end;
+
+function esError(f, c: integer): boolean;
+var fError: integer;
+begin
+    esError:=false;
+    for fError:=0 to nError-1 do
+    begin
+        if ((f=indexerror[fError, 0]) and (c=indexerror[fError, 1])) then
+        begin
+            esError:=true;
+        end;
+    end;
+end;
+
+procedure eliminarError();
+var
+i,j,m: integer;
+sigueError: boolean;
+begin
+    for m:=0 to nError-1 do
+    begin
+        sigueError:=false;
+        for i:=1 to 9 do
+        begin
+            if not (i=indexerror[m, 1]) then
+            begin
+                if (tabJuego[indexerror[m, 0], i] = tabJuego[indexerror[m, 0], indexerror[m, 1]]) then
+                begin
+                    sigueError:=true;
+                    writeln('CONSEGUIDOF');
+                    delay(2000);
+                    break;
+                end;
+            end;
+        end;
+        for i:=0 to 9 do
+        begin
+            if not (i=indexerror[m,0]) then
+            begin
+                if (tabJuego[i, indexerror[m,1]] = tabJuego[indexerror[m,0], indexerror[m,1]]) then
+                begin
+                    sigueError:=true;
+                    writeln('CONSEGUIDOC');
+                    delay(2000);
+                    break;
+                end;
+            end;
+        end;
+        getSubArray(indexerror[m, 0], indexerror[m, 1]);
+        for i:=indexSubArray[1] to indexSubArray[1]+2 do
+        begin
+            for j:=indexSubArray[2] to indexSubArray[2]+2 do
+            begin
+                if not ((i=indexerror[m,0]) and (j=indexerror[m,1])) then
+                begin
+                    if (tabJuego[i,j] = tabJuego[indexerror[m,0], indexerror[m,1]]) then
+                    begin
+                        sigueError:=true;
+                        writeln('CONSEGUIDOM');
+                        delay(2000);
+                        break;
+                    end;
+                end;
+            end;
+        end;
+        if not sigueError then
+        begin
+            indexerror[m,0]:=0; indexerror[m,1]:=0
         end;
     end;
 end;
@@ -182,7 +285,7 @@ f, c, num: integer;
 begin
     clrscr;
     writeln('                                                          |---------------------------------------------------|');
-    writeln('                                                          | Para rendirse, introduzca 0 en cualquier momento. |');
+    writeln('                                                          | Para rendirse, introduzca R en cualquier momento. |');
     writeln('                                                          |---------------------------------------------------|');
     writeln('  ||===|===|===||===|===|===||===|===|===||');
     for f:=1 to 9 do
@@ -224,7 +327,7 @@ var
 f, c: integer;
 begin
     writeln('                                                          |---------------------------------------------------|');
-    writeln('                                                          | Para rendirse, introduzca 0 en cualquier momento. |');
+    writeln('                                                          | Para rendirse, introduzca R en cualquier momento. |');
     writeln('     1   2   3    4   5   6    7   8   9                  |---------------------------------------------------|');
     writeln('  ||===|===|===||===|===|===||===|===|===||');
     for f:=1 to 9 do
@@ -232,7 +335,22 @@ begin
         write('  || ');
         for c:=1 to 9 do
         begin
+            TextColor(15); //Si es un numero valido ingresado por el usuario, se imprime de color blanco.
             if esPista(f,c) then
+            begin
+                TextColor(3); //Si es pista, se imprime de color cyan.
+            end
+            else begin
+                if (tabJuego[f,c]=0) then
+                begin
+                    TextColor(0); //Si es cero, se imprime de color negro.
+                end
+                else begin
+                    if (esError(f,c)) then TextColor(4); //Si el numero se repite, se imprime de color rojo.
+                end;
+            end;
+            //////////////////////////////////////////////////////////////////
+            {if esPista(f,c) then
             begin
                 TextColor(3); //Si es pista, se imprime de color cyan.
             end
@@ -250,7 +368,7 @@ begin
                         TextColor(15); //Si es un numero valido ingresado por el usuario, se imprime de color blanco.
                     end;
                 end;
-            end;
+            end;}
             if (c mod 3 = 0) then
             begin
                 write(tabJuego[f,c]); TextColor(15); write(' || '); //Se resetea el color a blanco para imprimir las otras partes del tablero.
@@ -312,16 +430,14 @@ begin
     halt(0);
 end;
 
-procedure comprobarCero(n: string; nInt: integer); //Comprueba si el numero ingresado es un cero, para saber si el jugador se rindio.
+procedure comprobarR(n: string; nInt: integer); //Comprueba si el numero ingresado es un cero, para saber si el jugador se rindio.
 begin
-    if esNumero(n, nInt) then //En este procedimiento tambien se comprueba si el numero ingresado no es una letra o caracter especial.
+    if (n='r') or (n='R') then
     begin
-        if nInt=0 then
-        begin
-            mostrarRespuesta();
-        end;
-    end
-    else begin
+        mostrarRespuesta();
+    end;
+    if not esNumero(n, nInt) then //En este procedimiento tambien se comprueba si el numero ingresado no es una letra o caracter especial.
+    begin
         writeln('  |------------------------------------------------------------------------|');
         writeln('  |                    El dato ingresado no es válido.                     |');
         writeln('  |------------------------------------------------------------------------|');
@@ -350,7 +466,7 @@ begin
         write('  |-> ');
         readln(jugada);
         gotoXY(76, WhereY-1); writeln('|');
-        comprobarCero(jugada, jugadaInt);
+        comprobarR(jugada, jugadaInt);
     until esNumero(jugada, jugadaInt);
 end;
 
@@ -399,6 +515,9 @@ end;
 
 begin
     clrscr;
+    nError:=1;
+    SetLength(indexerror, nError, 2);
+    indexerror[0,0]:=0; indexerror[0,1]:=0;
     writeln('');
     writeln('  ||============================================||');
     writeln('  ||            ¡Bienvenido a SUDOKU!           ||');
@@ -441,25 +560,15 @@ begin
                 delay(3000);
             end;
         until not (esPista(fJugadaInt, cJugadaInt)); //Pide fila y columna hasta que se indique una posicion que no sea de una pista.
-        repeat
-            solicitarElemento(nJugado, nJugadoInt, 3);
-            tabJuego[fJugadaInt, cJugadaInt]:=nJugadoInt;
-            indexerror[1]:=0;
-            indexerror[2]:=0;
-            if not numeroValido() then
-            begin
-                clrscr;
-                indexerror[1]:=fJugadaInt;
-                indexerror[2]:=cJugadaInt;
-                generarTableroJuego();
-                writeln('  |------------------------------------------------------------------------|');
-                writeln('  | El número se repite en la misma fila, columna, o matriz de 3x3.        |');
-                writeln('  |------------------------------------------------------------------------|');
-                writeln('  | Ingrese un valor válido.                                               |');
-                writeln('  |------------------------------------------------------------------------|');
-                delay(3000);
-            end;
-        until numeroValido(); //Se pide el numero hasta que se agregue uno que no se repite.
+        solicitarElemento(nJugado, nJugadoInt, 3);
+        tabJuego[fJugadaInt, cJugadaInt]:=nJugadoInt;
+        numeroValido(fJugadaInt, cJugadaInt, nJugadoInt);
+        eliminarError();
+        for aaa:=0 to nError-1 do
+        begin
+            writeln(indexerror[aaa, 0], '   ', indexerror[aaa, 1]);
+        end;
+        readkey;
     until ComprobarTabCompletado(); //El juego termina cuando el tablero se completa.
     clrscr;
     generarTableroJuego(); //Genera el tablero completado.
