@@ -137,27 +137,27 @@ begin
     end;
 end;
 
-procedure agregarError(f, c: integer);
+procedure agregarError(f, c: integer); //Para agregar los indices de la posicion con un error en el arreglo de indices
 var
 fError, i: integer;
 begin
-    if (esPista(f, c)) then
+    if (esPista(f, c)) then //Si las posiciones coinciden con una pista, no se agrega.
     begin
         exit;
     end;
-    for i:=0 to length(indexerror)-1 do
+    for i:=0 to length(indexerror)-1 do //Para recorrer el arreglo.
     begin
-        if ((indexerror[i, 0]=f) and (indexerror[i, 1]=c)) then exit;
+        if ((indexerror[i, 0]=f) and (indexerror[i, 1]=c)) then exit; //Si ya esta en el arreglo, no se vuelve a agregar.
     end;
     for fError:=0 to nError-1 do
     begin
-        if indexerror[fError, 0]=0 then
+        if indexerror[fError, 0]=0 then //Si se consigue una posicion que tiene ceros, se guarda ahi.
         begin
             indexerror[fError, 0]:=f; indexerror[fError, 1]:=c;
             exit;
         end;
     end;
-    nError+=1;
+    nError+=1; //En caso de no estar repetido ni agregarse al inicio o mitad del arreglo.
     SetLength(indexerror, nError, 2);
     indexerror[nError-1, 0]:=f; indexerror[nError-1, 1]:=c;
 end;
@@ -175,7 +175,7 @@ begin
             if (tabJuego[f, m]=n) then //Si se repite en la fila, no es valido.
             begin
                 agregar:=true;
-                agregarError(f, m);
+                agregarError(f, m); //Agrega donde consiguio la repeticion
             end;
         end;
         if not (m=f) then //Para no chequear la posicion donde se esta ingresando el numero.
@@ -183,7 +183,7 @@ begin
             if (tabJuego[m, c]=n) then //Si se repite en la columna, no es valido.
             begin
                 agregar:=true;
-                agregarError(m, c);
+                agregarError(m, c); //Agrega donde consiguio la repeticion
             end;
         end;
     end;
@@ -197,18 +197,18 @@ begin
                 if (tabJuego[m,a]=n) then //Si se repite en el 3x3, no es valido.
                 begin
                     agregar:=true;
-                    agregarError(m,a);
+                    agregarError(m,a); //Agrega donde consiguio la repeticion
                 end;
             end;
         end;
     end;
     if agregar then
     begin
-        agregarError(f, c);
+        agregarError(f, c); //Agrega la posicion que se ingreso
     end;
 end;
 
-function esError(f, c: integer): boolean;
+function esError(f, c: integer): boolean; //Para determinar si los indices son la posicion de un error.
 var fError: integer;
 begin
     esError:=false;
@@ -217,11 +217,12 @@ begin
         if ((f=indexerror[fError, 0]) and (c=indexerror[fError, 1])) then
         begin
             esError:=true;
+            break;
         end;
     end;
 end;
 
-procedure eliminarError();
+procedure eliminarError(); //Para eliminar indices de posiciones que dejan de ser errores.
 var
 i,j,m: integer;
 sigueError: boolean;
@@ -231,9 +232,9 @@ begin
         sigueError:=false;
         for i:=1 to 9 do
         begin
-            if not (i=indexerror[m, 1]) then
+            if not (i=indexerror[m, 1]) then //Para no chequear su misma posicion.
             begin
-                if (tabJuego[indexerror[m, 0], i] = tabJuego[indexerror[m, 0], indexerror[m, 1]]) then
+                if (tabJuego[indexerror[m, 0], i] = tabJuego[indexerror[m, 0], indexerror[m, 1]]) then //Si se repite en la fila.
                 begin
                     sigueError:=true;
                     break;
@@ -242,23 +243,23 @@ begin
         end;
         for i:=0 to 9 do
         begin
-            if not (i=indexerror[m,0]) then
+            if not (i=indexerror[m,0]) then //Para no chequear su misma posicion.
             begin
-                if (tabJuego[i, indexerror[m,1]] = tabJuego[indexerror[m,0], indexerror[m,1]]) then
+                if (tabJuego[i, indexerror[m,1]] = tabJuego[indexerror[m,0], indexerror[m,1]]) then //Si se repite en la columna.
                 begin
                     sigueError:=true;
                     break;
                 end;
             end;
         end;
-        getSubArray(indexerror[m, 0], indexerror[m, 1]);
+        getSubArray(indexerror[m, 0], indexerror[m, 1]); //Consigue la posicion inicial del 3x3
         for i:=indexSubArray[1] to indexSubArray[1]+2 do
         begin
             for j:=indexSubArray[2] to indexSubArray[2]+2 do
             begin
-                if not ((i=indexerror[m,0]) and (j=indexerror[m,1])) then
+                if not ((i=indexerror[m,0]) and (j=indexerror[m,1])) then //Para no chequear su misma posicion.
                 begin
-                    if (tabJuego[i,j] = tabJuego[indexerror[m,0], indexerror[m,1]]) then
+                    if (tabJuego[i,j] = tabJuego[indexerror[m,0], indexerror[m,1]]) then //Si se repite en 3x3.
                     begin
                         sigueError:=true;
                         break;
@@ -266,7 +267,7 @@ begin
                 end;
             end;
         end;
-        if not sigueError then
+        if not sigueError then //Si ya no es error, los valores son reemplazados por ceros.
         begin
             indexerror[m,0]:=0; indexerror[m,1]:=0
         end;
@@ -343,26 +344,6 @@ begin
                     if (esError(f,c)) then TextColor(4); //Si el numero se repite, se imprime de color rojo.
                 end;
             end;
-            //////////////////////////////////////////////////////////////////
-            {if esPista(f,c) then
-            begin
-                TextColor(3); //Si es pista, se imprime de color cyan.
-            end
-            else begin
-                if (tabJuego[f,c]=0) then
-                begin
-                    TextColor(0); //Si es cero, se imprime de color negro.
-                end
-                else begin
-                    if ((f=indexerror[1]) and (c=indexerror[2])) then 
-                    begin
-                        TextColor(4); //Si el numero se repite, se imprime de color rojo.
-                    end
-                    else begin
-                        TextColor(15); //Si es un numero valido ingresado por el usuario, se imprime de color blanco.
-                    end;
-                end;
-            end;}
             if (c mod 3 = 0) then
             begin
                 write(tabJuego[f,c]); TextColor(15); write(' || '); //Se resetea el color a blanco para imprimir las otras partes del tablero.
@@ -424,7 +405,7 @@ begin
     halt(0);
 end;
 
-procedure comprobarR(n: string; nInt: integer); //Comprueba si el numero ingresado es un cero, para saber si el jugador se rindio.
+procedure comprobarR(n: string; nInt: integer); //Comprueba si el dato ingresado es una R, para saber si el jugador se rindio.
 begin
     if (n='r') or (n='R') then
     begin
@@ -536,7 +517,7 @@ begin
         write('  |-> ');
         readln(nombre); gotoXY(57, WhereY-1); writeln('|');
         writeln('  |-----------------------------------------------------|');
-    until validarNombre();
+    until validarNombre(); //Pide nickname hasta colocar algo valido.
     writeln('  | ¡Hola, ', nombre, '! Te deseamos mucha suerte.'); gotoXY(57, WhereY-1); writeln('|');
     writeln('  |-----------------------------------------------------|');
     writeln('  | Presione cualquier tecla para continuar...'); gotoXY(57, WhereY-1); writeln('|');
